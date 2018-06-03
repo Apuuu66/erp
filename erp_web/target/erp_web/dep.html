@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>部门</title>
+    <link rel="stylesheet" type="text/css" href="easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">
+    <script type="text/javascript" src="easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="easyui/jquery.serializejson.js"></script>
+</head>
+<body>
+<div class="easyui-panel" style="padding-left: 4px;border-bottom: 0px">
+    <div style="height: 2px"></div>
+    <form id="searchForm">
+        <table>
+            <tr>
+                <td>部门名称</td>
+                <td><input type="text" name="name"></td>
+            </tr>
+            <tr>
+                <td>部门电话</td>
+                <td><input type="text" name="tele"></td>
+            </tr>
+        </table>
+        <button type="button" id="btnSearch">查询</button>
+    </form>
+    <div style="height: 2px"></div>
+
+</div>
+
+//数据表格
+<table id="gird"></table>
+
+
+<div id="editDlg">
+    <form id="editForm">
+        <table>
+            <tr>
+                <td>部门名称</td>
+                <td><input type="text" name="name"></td>
+            </tr>
+            <tr>
+                <td>部门电话</td>
+                <td><input type="text" name="tele"></td>
+            </tr>
+        </table>
+    </form>
+    <button type="button" id="btnSave">保存</button>
+</div>
+
+</body>
+<script>
+    // $(function () {
+    //     $.messager.alert("提示", [{"uuid":1,"name":"管理员组","tele":"000000"}])
+
+    //数据表格
+    $(function () {
+        $('#gird').datagrid({
+            // url: 'dep/list',
+            url: 'dep/depPage',
+            columns: [[
+                {field: 'uuid', title: '部门编号', width: 100},
+                {field: 'name', title: '部门名称', width: 100},
+                {field: 'tele', title: '部门电话', width: 100, align: 'right'}
+            ]],
+
+            loadMsg: '嗖 ----正在火速加载中 -------------', //加载提示
+            pagination: true, //显示分页工具栏
+            rownumbers: true, //显示行号列
+            singleSelect: true,//是允许选择一行
+            //工具栏
+            toolbar: [{
+                text: '添加',
+                iconCls: 'icon-add',
+                handler: function () {
+                    $("#editDlg").dialog("open");
+                }
+            }, {
+                text: '编辑',
+                iconCls: 'icon-edit',
+                handler: function () {
+                    alert('edit')
+                }
+            }, {
+                text: '删除',
+                iconCls: 'icon-remove',
+                handler: function () {
+                    alert('edit')
+                }
+            }, {
+                text: 'Help',
+                iconCls: 'icon-help',
+                handler: function () {
+                    alert('help')
+                }
+            }]
+        });
+
+        //匹配查询
+        $('#btnSearch').bind('click', function () {
+            // alert(JSON.stringify($("#gird").datagrid('getData')));
+            $.ajax({
+                type: "post",
+                url: "dep/tt",
+                data: $('#searchForm').serialize(),
+                // contentType: "application/json;charset=utf-8",
+                success: function (rtn) {//返回json结果
+                    //grid加载数据
+                    $("#gird").datagrid('loadData', rtn);
+                }
+            });
+        })
+        //对话框
+        $('#editDlg').dialog({
+            title: '部门编辑',
+            width: 300,
+            height: 200,
+            closed: true,
+            modal: true
+        });
+
+        $("#btnSave").bind("click", function () {
+            $.ajax({
+                type: "post",
+                url: "dep/add",
+                data: $('#editForm').serialize(),
+                success: function (rtn) {
+                    $.messager.alert("提示", rtn.message, "info", function () {
+                        // 关闭窗口 刷新表单
+                        $("#editDlg").dialog("close");
+                        $("#gird").datagrid("reload");
+                    })
+                }
+            });
+        })
+    });
+</script>
+</html>
