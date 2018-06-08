@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>员工管理</title>
+    <link rel="stylesheet" type="text/css" href="easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">
+    <script type="text/javascript" src="easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="easyui/jquery.serializejson.js"></script>
+    <script type="text/javascript" src="easyui/date.js"></script>
+</head>
+<body>
+<div class="easyui-panel" style="padding-left: 4px;border-bottom: 0px">
+    <!--<div style="height: 2px"></div>-->
+</div>
+
+<div>
+    <table id="mygird"></table>
+</div>
+<!--添加按钮-->
+<div id='toolbar'>
+    <form id="searchForm">
+        <tr>
+            <td>昵称</td>
+            <td><input type="text" name="name"></td>
+        </tr>
+        <tr>
+            <td>电话</td>
+            <td><input type="text" name="tele"></td>
+        </tr>
+
+        <a href="javascript:void(0);" class="easyui-linkbutton" onclick="searchEmp()"
+           data-options="iconCls:'icon-search'">搜索</a>
+    </form>
+    <a class='easyui-linkbutton' iconcls='icon-add' href='javascript:void(0)' onclick="Insert()">添加</a>
+    <a class='easyui-linkbutton' iconcls='icon-edit' href='javascript:void(0)' onclick="Edit()">编辑</a>
+    <a class='easyui-linkbutton' iconcls='icon-cancel' href='javascript:void(0)' onclick="Delete()">删除</a>
+
+</div>
+
+<div id="empDlg" class="easyui-dialog" style="width:300px;height:150px"
+     data-options="title:'部门管理',buttons:'#btn',closed: true,modal:true">
+    <form id="empForm">
+        <table>
+            <!--1为添加，2为修改-->
+            <input type="hidden" id="state" value="1"/>
+            <tr id="trh" hidden>
+                <td>编号</td>
+                <td><input type="text" id="uuid" name="uuid" readonly></td>
+            </tr>
+            <tr>
+                <td>登陆名</td>
+                <td><input type="text" id="username" name="username"></td>
+            </tr>
+            <tr>
+                <td>真实姓名</td>
+                <td><input type="text" id="name" name="name" class="easyui-validatebox"
+                           data-options="required:true,validType:'email'"></td>
+            </tr>
+            <tr>
+                <td>性别</td>
+                <td><input type="text" id="gender" name="gender"></td>
+            </tr>
+            <tr>
+                <td>邮件地址</td>
+                <td><input type="text" id="email" name="email"></td>
+            </tr>
+            <tr>
+                <td>联系电话</td>
+                <td><input type="text" id="tele" name="tele"></td>
+            </tr>
+            <tr>
+                <td>联系地址</td>
+                <td><input type="text" id="address" name="address"></td>
+            </tr>
+            <tr>
+                <td>出生年月日</td>
+                <td><input type="datetime-local" id="birthday" name="birthday"></td>
+            </tr>
+            <tr>
+                <td>部门</td>
+                <td><input type="text" id="depuuid" name="depuuid"></td>
+            </tr>
+        </table>
+    </form>
+    <div id="btn">
+        <a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-save'"
+           onclick='Submit()'>确定</a>
+        <a href='javascript:void(0);' class="easyui-linkbutton" data-options="iconCls:'icon-cancel'"
+           onclick='$("#empDlg").dialog("close", false);'>取消</a>
+    </div>
+</div>
+
+
+</body>
+<script>
+    // 数据表格
+    $(function () {
+        $('#mygird').datagrid({
+            title: "员工管理",
+            url: 'emp/empPage',
+            columns: [[
+                {field: "", checkbox: true},  //复选框
+                {field: 'uuid', title: '编号', width: 100, align: 'center'},
+                {field: 'username', title: '登陆名', width: 100, align: 'center'},
+                {field: 'name', title: '真实姓名', width: 100, align: 'right'},
+                {
+                    field: 'gender', title: '性别', width: 100, align: 'right',
+                    formatter: function (value, row, index) {
+                        if (1 == value * 1) {
+                            return '男'
+                        }
+                        if (0 == value) {
+                            return '女'
+                        }
+                    }
+                },
+                {field: 'email', title: '邮件地址', width: 100, align: 'right'},
+                {field: 'tele', title: '联系电话', width: 100, align: 'right'},
+                {field: 'address', title: '联系地址', width: 100, align: 'right'},
+                {
+                    field: 'birthday',
+                    title: '出生年月日',
+                    width: 170,
+                    align: 'right',
+                    formatter: function (value) {
+                        return new Date(value).Format("yyyy-MM-dd");
+                    }
+                },
+                {field: '-', title: '部门', width: 100, align: 'right'}
+            ]],
+            loadMsg: '嗖 ----正在火速加载中 -------------', //加载提示
+            pagination: true, //显示分页工具栏
+            rownumbers: true, //显示行号列
+            singleSelect: true,//是允许选择一行
+            toolbar: "#toolbar",//工具栏
+        });
+    });
+
+    //查询
+    function searchEmp() {
+        $.ajax({
+            type: "post",
+            url: "emp/tt",
+            data: $('#searchForm').serialize(),
+            // contentType: "application/json;charset=utf-8",
+            success: function (rtn) {//返回json结果
+                //grid加载数据
+                $("#mygird").datagrid('loadData', rtn);
+            }
+        });
+    }
+
+    //提交
+    function Submit() {
+        <!--1为添加，2为修改-->
+        var state = $("#state").val();
+        if (state == 1) {
+            addEmp();
+        } else
+            editEmp();
+    }
+
+    // 添加
+    function Insert() {
+        $("#empForm").form('clear');
+        $("#trh").attr("hidden", true);
+        $("#state").val(1);
+        $("#empDlg").dialog("open");
+        //设置添加dialog
+        $("#empDlg").dialog({
+            title: "添加部门",
+            width: 300,
+            height: 300,
+            closed: false,
+            modal: true //定义窗口是不是模态（modal）窗口。
+        });
+    }
+
+    // 编辑
+    function Edit() {
+        $("#trh").attr("hidden", false);
+        $("#state").val(2);
+        var row = $("#mygird").datagrid('getSelected');
+        if (row != null) {
+            $("#uuid").attr('value', row.uuid);
+            $("#name").val(row.name);
+            $("#tele").val(row.tele);
+            //设置添加dialog
+            $("#empDlg").dialog({
+                title: "修改部门",
+                width: 290,
+                height: 200,
+                closed: false,
+                modal: true //定义窗口是不是模态（modal）窗口。
+            });
+        } else {
+            $.messager.alert("提示", "请先选中要编辑的行!");
+        }
+    }
+
+    // 删除
+    function Delete() {
+        var row = $("#mygird").datagrid('getSelected');
+        if (row == null) {
+            $.messager.alert("提示", "请先选中要删除的行!");
+            return false;
+        }
+        $.messager.confirm("提示", "确定要删除么?", function (r) {
+            if (r) {
+                $.ajax({
+                    type: "POST",
+                    url: 'emp/delete',
+                    data: {uuid: row.uuid},
+                    // contentType: "application/json;charset=utf-8",
+                    success: function (rtn) {
+                        $.messager.alert("提示", rtn.message, "info", function () {
+                            $("#mygird").datagrid("reload");
+                        })
+                    },
+                });
+            }
+        });
+
+    }
+
+    // 添加提交
+    function addEmp() {
+        $.ajax({
+            type: "post",
+            url: "emp/add",
+            data: $('#empForm').serialize(),
+            success: function (rtn) {
+                $.messager.alert("提示", rtn.message, "info", function () {
+                    // 关闭窗口 刷新表单
+                    $("#empDlg").dialog("close");
+                    $("#mygird").datagrid("reload");
+                });
+            }
+        });
+    }
+
+    // 编辑提交
+    function editEmp() {
+        $.ajax({
+            type: "post",
+            url: "emp/update",
+            data: $("#empForm").serialize(),
+            success: function (rtn) {
+                $.messager.alert("提示", rtn.message, "info", function () {
+                    // 关闭窗口 刷新表单
+                    $("#empDlg").dialog("close");
+                    $("#mygird").datagrid("reload");
+                });
+            }
+        });
+    }
+
+    // 格式化日期时间
+    function dateFormatter(value, row, index) {
+        var date = new Date(value);
+        var year = date.getFullYear().toString();
+        var month = (date.getMonth() + 1);
+        var day = date.getDate().toString();
+        var hour = date.getHours().toString();
+        var minutes = date.getMinutes().toString();
+        var seconds = date.getSeconds().toString();
+        if (month < 10) {
+            month = "0" + month;
+        }
+        if (day < 10) {
+            day = "0" + day;
+        }
+        if (hour < 10) {
+            hour = "0" + hour;
+        }
+        if (minutes < 10) {
+            minutes = "0" + minutes;
+        }
+        if (seconds < 10) {
+            seconds = "0" + seconds;
+        }
+        //2018-06-15 08:00:00
+        // return year + "-" + month + "-" + day + " " + hour + ":" + minutes + ":" + seconds;
+        //2018-06-15
+        return year + "-" + month + "-" + day;
+    }
+</script>
+</html>

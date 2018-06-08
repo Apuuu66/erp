@@ -22,9 +22,15 @@ public class DepDaoTest {
     @Autowired
     private DepDao depDao;
 
+
     @Test
     public void getList() {
         List<Dep> list = depDao.getList();
         System.out.println(list);
+    }
+
+    @Test
+    public void selectMenu() {
+
     }
 }

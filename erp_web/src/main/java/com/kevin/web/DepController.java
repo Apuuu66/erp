@@ -23,7 +23,7 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping("/dep")
-@Scope(value = "prototype")
+//@Scope(value = "prototype")
 public class DepController {
     @Autowired
     private DepService depService;
@@ -85,10 +85,9 @@ public class DepController {
 
     @RequestMapping("/delete")
     @ResponseBody
-    public State deleteDep(@RequestBody String uuid) {
+    public State deleteDep(Dep dep) {
         try {
-            System.out.println(uuid);
-            depService.deleteDep(uuid);
+            depService.deleteDep(dep.getUuid().toString());
             return new State(true, "删除成功");
         } catch (Exception e) {
             e.printStackTrace();

@@ -54,8 +54,9 @@ public class DepServiceImpl implements DepService {
         depDao.updateDep(dep);
     }
 
+
     @Override
-    public void deleteDep(String uuid) throws Exception{
+    public void deleteDep(String uuid) throws Exception {
         depDao.deleteDep(uuid);
     }
 

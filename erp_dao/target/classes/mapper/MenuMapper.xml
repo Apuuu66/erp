@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kevin.dao.MenuDao">
+    <resultMap type="com.kevin.entity.Menu" id="recursionMenuMap">
+        <id column="menuid" property="menuid"/>
+        <result column="menuname" property="menuname"/>
+        <result column="icon" property="icon"/>
+        <result column="url" property="url"/>
+        <collection property="menus" ofType="com.kevin.entity.Menu" column="menuid" select="findMenuByParentId"/>
+    </resultMap>
+
+    <select id="findMenuByParentId" resultType="com.kevin.entity.Menu" resultMap="recursionMenuMap">
+        SELECT * FROM menu WHERE pid = #{id}  ORDER BY menuid
+    </select>
+
+    <select id="getMenusTree" resultMap="recursionMenuMap" parameterType="java.lang.Integer">
+        SELECT * FROM menu WHERE menuid =#{parent} ORDER BY menuid
+    </select>
+
+
+    <select id="getMenuById" parameterType="java.lang.String" resultType="com.kevin.entity.Menu">
+        SELECT * FROM menu WHERE menuid = #{menuid}
+    </select>
+
+    <delete id="deleteRoleMenusByRoleId" parameterType="java.lang.Long">
+        DELETE FROM `erp`.`role_menu` WHERE `roleuuid` = #{roleuuid}
+    </delete>
+    <insert id="insertRoleMenu">
+        INSERT INTO role_menu (roleuuid, menuuuid) VALUES (#{roleuuid}, #{menuuuid})
+    </insert>
+</mapper>

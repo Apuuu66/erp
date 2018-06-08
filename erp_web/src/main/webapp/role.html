@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>角色管理</title>
+    <link rel="stylesheet" type="text/css" href="easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">
+    <script type="text/javascript" src="easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="easyui/jquery.serializejson.js"></script>
+    <script type="text/javascript" src="js/mycrud.js"></script>
+</head>
+<body>
+
+<div>
+    <table id="myGird"></table>
+</div>
+
+<div id="myDlg" class="easyui-dialog" class="easyui-dialog" style="width:300px;height:150px"
+     data-options="title:'部门管理',buttons:'#btn',closed: true,modal:true">
+    <form id="editForm">
+        <table>
+            <tr id="trh">
+                <td>ID</td>
+                <td><input type="text" id="uuid" name="uuid" readonly></td>
+            </tr>
+            <tr>
+                <td>名称</td>
+                <td><input type="text" id="name" name="name"></td>
+            </tr>
+
+        </table>
+    </form>
+    <div id="btn">
+        <a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-save'"
+           onclick='Submit()'>确定</a>
+        <a href='javascript:void(0);' class="easyui-linkbutton" data-options="iconCls:'icon-cancel'"
+           onclick='$("#myDlg").dialog("close", false);'>取消</a>
+    </div>
+</div>
+
+<div id='toolbar' class="easyui-panel" style="padding-left:4px;border-bottom:0px;">
+
+    <div style="height:2px;"></div>
+
+    <form id="searchForm">
+        名称：<input name="name">
+        <button type="button" id="btnSearch">查询</button>
+    </form>
+
+    <div style="height:2px;"></div>
+
+    <a class='easyui-linkbutton' iconcls='icon-add' href='javascript:void(0)' onclick="Insert()">添加</a>
+    <a class='easyui-linkbutton' iconcls='icon-edit' href='javascript:void(0)' onclick="Edit()">编辑</a>
+    <a class='easyui-linkbutton' iconcls='icon-cancel' href='javascript:void(0)' onclick="Delete()">删除</a>
+</div>
+
+</body>
+
+<script type="text/javascript">
+    var urlPrefix = "role";
+    var pageName = "角色";
+    var w = 240;
+    var h = 140;
+    var columns = [[
+        {field: "", checkbox: true},  //复选框
+        {field: 'uuid', title: '编号', width: 100},
+        {field: 'name', title: '名称', width: 100}
+    ]];
+
+
+</script>
+
+</html>

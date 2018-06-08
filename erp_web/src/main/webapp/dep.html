@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>部门</title>
+    <title>部门管理</title>
     <link rel="stylesheet" type="text/css" href="easyui/themes/default/easyui.css">
     <link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">
     <script type="text/javascript" src="easyui/jquery.min.js"></script>
@@ -12,129 +12,198 @@
 </head>
 <body>
 <div class="easyui-panel" style="padding-left: 4px;border-bottom: 0px">
-    <div style="height: 2px"></div>
+    <!--<div style="height: 2px"></div>-->
+</div>
+
+<div>
+    <table id="mygird"></table>
+</div>
+<!--添加按钮-->
+<div id='toolbar'>
     <form id="searchForm">
-        <table>
-            <tr>
-                <td>部门名称</td>
-                <td><input type="text" name="name"></td>
-            </tr>
-            <tr>
-                <td>部门电话</td>
-                <td><input type="text" name="tele"></td>
-            </tr>
-        </table>
-        <button type="button" id="btnSearch">查询</button>
+        <tr>
+            <td>部门名称</td>
+            <td><input type="text" name="name" class="easyui-combobox"
+                       data-options="url:'/dep/list',valueField:'name',textField:'name'"></td>
+        </tr>
+        <tr>
+            <td>部门电话</td>
+            <td><input type="text" name="tele"></td>
+        </tr>
+
+        <a href="javascript:void(0);" class="easyui-linkbutton" onclick="searchDep()"
+           data-options="iconCls:'icon-search'">搜索</a>
     </form>
-    <div style="height: 2px"></div>
+    <a class='easyui-linkbutton' iconcls='icon-add' href='javascript:void(0)' onclick="Insert()">添加</a>
+    <a class='easyui-linkbutton' iconcls='icon-edit' href='javascript:void(0)' onclick="Edit()">编辑</a>
+    <a class='easyui-linkbutton' iconcls='icon-cancel' href='javascript:void(0)' onclick="Delete()">删除</a>
 
 </div>
 
-//数据表格
-<table id="gird"></table>
-
-
-<div id="editDlg">
-    <form id="editForm">
+<div id="depDlg" class="easyui-dialog" style="width:300px;height:150px"
+     data-options="title:'部门管理',buttons:'#btn',closed: true,modal:true">
+    <form id="depForm">
         <table>
+            <!--1为添加，2为修改-->
+            <input type="hidden" id="state" value="1"/>
+            <tr id="trh" hidden>
+                <td>部门编号</td>
+                <td><input type="text" id="uuid" name="uuid" readonly></td>
+            </tr>
             <tr>
                 <td>部门名称</td>
-                <td><input type="text" name="name"></td>
+                <td><input type="text" id="name" name="name"></td>
             </tr>
             <tr>
                 <td>部门电话</td>
-                <td><input type="text" name="tele"></td>
+                <td><input type="text" id="tele" name="tele"></td>
             </tr>
         </table>
     </form>
-    <button type="button" id="btnSave">保存</button>
+    <div id="btn">
+        <a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-save'"
+           onclick='Submit()'>确定</a>
+        <a href='javascript:void(0);' class="easyui-linkbutton" data-options="iconCls:'icon-cancel'"
+           onclick='$("#depDlg").dialog("close", false);'>取消</a>
+    </div>
 </div>
+
 
 </body>
 <script>
-    // $(function () {
-    //     $.messager.alert("提示", [{"uuid":1,"name":"管理员组","tele":"000000"}])
+    // 数据表格
 
-    //数据表格
     $(function () {
-        $('#gird').datagrid({
-            // url: 'dep/list',
-            url: 'dep/depPage',
-            columns: [[
-                {field: 'uuid', title: '部门编号', width: 100},
-                {field: 'name', title: '部门名称', width: 100},
-                {field: 'tele', title: '部门电话', width: 100, align: 'right'}
-            ]],
+            $('#mygird').datagrid({
+                title: "部门管理",
+                url: 'dep/depPage',
+                columns: [[
+                    {field: "", checkbox: true},  //复选框
+                    {field: 'uuid', title: '部门编号', width: 100, align: 'center'},
+                    {field: 'name', title: '部门名称', width: 100, align: 'center'},
+                    {field: 'tele', title: '部门电话', width: 100, align: 'right'}
+                ]],
+                loadMsg: '嗖 ----正在火速加载中 -------------', //加载提示
+                pagination: true, //显示分页工具栏
+                rownumbers: true, //显示行号列
+                singleSelect: true,//是允许选择一行
+                toolbar: "#toolbar",//工具栏
+            });
+        }
+    );
 
-            loadMsg: '嗖 ----正在火速加载中 -------------', //加载提示
-            pagination: true, //显示分页工具栏
-            rownumbers: true, //显示行号列
-            singleSelect: true,//是允许选择一行
-            //工具栏
-            toolbar: [{
-                text: '添加',
-                iconCls: 'icon-add',
-                handler: function () {
-                    $("#editDlg").dialog("open");
-                }
-            }, {
-                text: '编辑',
-                iconCls: 'icon-edit',
-                handler: function () {
-                    alert('edit')
-                }
-            }, {
-                text: '删除',
-                iconCls: 'icon-remove',
-                handler: function () {
-                    alert('edit')
-                }
-            }, {
-                text: 'Help',
-                iconCls: 'icon-help',
-                handler: function () {
-                    alert('help')
-                }
-            }]
+    //查询
+    function searchDep() {
+        $.ajax({
+            type: "post",
+            url: "dep/tt",
+            data: $("#searchForm").serialize(),
+            // dataType: "JSON",
+            // contentType: "application/json",
+            success: function (rtn) {//返回json结果
+                $("#mygird").datagrid('loadData', rtn);
+            }
+        });
+    }
+
+    function Submit() {
+        <!--1为添加，2为修改-->
+        var state = $("#state").val();
+        if (state == 1) {
+            addDep();
+        } else
+            editDep();
+    }
+
+    function Insert() {
+        $("#name").val("");
+        $("#tele").val("");
+        $("#trh").attr("hidden", true);
+        $("#state").val(1);
+        $("#depDlg").dialog("open");
+        //设置添加dialog
+        $("#depDlg").dialog({
+            title: "添加部门",
+            width: 290,
+            height: 150,
+            closed: false,
+            modal: true //定义窗口是不是模态（modal）窗口。
+        });
+    }
+
+    function Edit() {
+        $("#trh").attr("hidden", false);
+        $("#state").val(2);
+        var row = $("#mygird").datagrid('getSelected');
+        if (row != null) {
+            $("#uuid").attr('value', row.uuid);
+            $("#name").val(row.name);
+            $("#tele").val(row.tele);
+            //设置添加dialog
+            $("#depDlg").dialog({
+                title: "修改部门",
+                width: 290,
+                height: 200,
+                closed: false,
+                modal: true //定义窗口是不是模态（modal）窗口。
+            });
+        } else {
+            $.messager.alert("提示", "请先选中要编辑的行!");
+        }
+    }
+
+    function Delete() {
+        var row = $("#mygird").datagrid('getSelected');
+        if (row == null) {
+            $.messager.alert("提示", "请先选中要删除的行!");
+            return false;
+        }
+        $.messager.confirm("提示", "确定要删除么?", function (r) {
+            if (r) {
+                $.ajax({
+                    type: "POST",
+                    url: 'dep/delete',
+                    data: {uuid: row.uuid},
+                    // contentType: "application/json;charset=utf-8",
+                    success: function (rtn) {
+                        $.messager.alert("提示", rtn.message, "info", function () {
+                            $("#mygird").datagrid("reload");
+                        })
+                    },
+                });
+            }
         });
 
-        //匹配查询
-        $('#btnSearch').bind('click', function () {
-            // alert(JSON.stringify($("#gird").datagrid('getData')));
-            $.ajax({
-                type: "post",
-                url: "dep/tt",
-                data: $('#searchForm').serialize(),
-                // contentType: "application/json;charset=utf-8",
-                success: function (rtn) {//返回json结果
-                    //grid加载数据
-                    $("#gird").datagrid('loadData', rtn);
-                }
-            });
-        })
-        //对话框
-        $('#editDlg').dialog({
-            title: '部门编辑',
-            width: 300,
-            height: 200,
-            closed: true,
-            modal: true
-        });
+    }
 
-        $("#btnSave").bind("click", function () {
-            $.ajax({
-                type: "post",
-                url: "dep/add",
-                data: $('#editForm').serialize(),
-                success: function (rtn) {
-                    $.messager.alert("提示", rtn.message, "info", function () {
-                        // 关闭窗口 刷新表单
-                        $("#editDlg").dialog("close");
-                        $("#gird").datagrid("reload");
-                    })
-                }
-            });
-        })
-    });
+    function addDep() {
+        $.ajax({
+            type: "post",
+            url: "dep/add",
+            data: $('#depForm').serialize(),
+            success: function (rtn) {
+                $.messager.alert("提示", rtn.message, "info", function () {
+                    // 关闭窗口 刷新表单
+                    $("#depDlg").dialog("close");
+                    $("#mygird").datagrid("reload");
+                });
+            }
+        });
+    }
+
+    function editDep() {
+        $.ajax({
+            type: "post",
+            url: "dep/update",
+            data: $("#depForm").serialize(),
+            success: function (rtn) {
+                $.messager.alert("提示", rtn.message, "info", function () {
+                    // 关闭窗口 刷新表单
+                    $("#depDlg").dialog("close");
+                    $("#mygird").datagrid("reload");
+                });
+            }
+        });
+    }
 </script>
 </html>

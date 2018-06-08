@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kevin.dao.EmpDao">
+    <select id="getList" resultType="com.kevin.entity.Emp">
+        SELECT * FROM emp
+    </select>
+    <select id="getByConditionCount" parameterType="com.kevin.entity.Emp" resultType="java.lang.Integer">
+        SELECT count(*) FROM emp
+        <include refid="emp_where"/>
+    </select>
+    <select id="getListByEmp" parameterType="com.kevin.entity.Emp" resultType="com.kevin.entity.Emp">
+        SELECT * FROM emp
+        <include refid="emp_where"/>
+    </select>
+
+    <sql id="emp_where">
+        <where>
+            <if test="name!=null and name!= ''">
+                and name LIKE '%${name}%'
+            </if>
+            <if test="tele != null and tele !=''">
+                and tele LIKE '%${tele}%'
+            </if>
+        </where>
+    </sql>
+
+    <select id="getEmpTotalCount" resultType="java.lang.Integer">
+        SELECT count(*) FROM emp
+    </select>
+
+    <select id="getEmpsByPage" resultType="com.kevin.entity.Emp">
+        SELECT * FROM emp LIMIT #{L},#{pageSize}
+    </select>
+
+    <insert id="addEmp" parameterType="com.kevin.entity.Emp">
+        INSERT INTO `erp`.`emp`(`username`, `pwd`, `name`, `gender`, `email`, `tele`, `address`, `birthday`)
+         VALUES (#{username},#{pwd},#{name},#{gender},#{email},#{tele},#{address},#{birthday})
+    </insert>
+
+    <update id="updateEmp" parameterType="com.kevin.entity.Emp">
+        UPDATE emp SET `name` = #{name}, `tele` = #{tele} WHERE `uuid` = #{uuid}
+    </update>
+    <delete id="deleteEmp" parameterType="java.lang.String">
+        DELETE FROM emp WHERE `uuid` = #{uuid}
+    </delete>
+
+    <select id="findUserByNameAndPwd" parameterType="com.kevin.entity.Emp" resultType="com.kevin.entity.Emp">
+    SELECT * FROM emp WHERE username = #{username} AND pwd =#{pwd};
+  </select>
+</mapper>

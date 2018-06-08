@@ -10,7 +10,7 @@
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <mvc:annotation-driven/>
+    <mvc:annotation-driven conversion-service="conversionService"/>
 
     <mvc:default-servlet-handler/>
 
@@ -22,5 +22,32 @@
 
     <!-- 4：扫描web相关的bean -->
     <context:component-scan base-package="com.kevin.web"/>
+
+    <!--配置自定义转换器,然后挂在到注解驱动里
+        <mvc:annotation-driven conversion-service="conversionService"/>
+    -->
+    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <bean class="com.kevin.web.converter.StrToDateConverter"></bean>
+            </set>
+        </property>
+    </bean>
+
+    <!--配置文件上传-->
+    <!--    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+            <property name="maxUploadSize">
+                &lt;!&ndash;5*1024*1024  5M&ndash;&gt;
+                <value>5242880</value>
+            </property>
+        </bean>-->
+
+    <!--配置拦截器-->
+    <!--    <mvc:interceptors>
+            <mvc:interceptor>
+                <mvc:mapping path="/**"/>
+                <bean class="com.levin.Interceptor.Interceptor1"/>
+            </mvc:interceptor>
+        </mvc:interceptors>-->
 
 </beans>
